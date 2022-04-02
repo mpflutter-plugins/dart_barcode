@@ -21,8 +21,6 @@ import 'package:barcode/barcode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'painter.dart';
-
 /// Error builder callback
 typedef BarcodeErrorBuilder = Widget Function(
     BuildContext context, String error);
@@ -62,7 +60,7 @@ class BarcodeWidget extends StatelessWidget {
       );
 
   /// Draw a barcode on screen using Uint8List data
-  const BarcodeWidget.fromBytes({
+  BarcodeWidget.fromBytes({
     Key? key,
     required this.data,
     required this.barcode,
@@ -77,7 +75,19 @@ class BarcodeWidget extends StatelessWidget {
     this.style,
     this.textPadding = 5,
     this.errorBuilder,
-  }) : super(key: key);
+  })  : svgData = Uint8List.fromList(utf8.encode(
+          barcode.toSvgBytes(
+            data,
+            width: width ?? 200,
+            height: height ?? 200,
+            color: color.value,
+            drawText: drawText,
+            textPadding: textPadding,
+            fontFamily: style?.fontFamily ?? 'monospace',
+            fontHeight: style?.height,
+          ),
+        )),
+        super(key: key);
 
   /// The barcode data to display
   final Uint8List data;
@@ -88,6 +98,8 @@ class BarcodeWidget extends StatelessWidget {
   ///   * Barcode.ean13()
   ///   * ...
   final Barcode barcode;
+
+  final Uint8List svgData;
 
   /// The bars color
   /// should be black or really dark color
@@ -126,53 +138,10 @@ class BarcodeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultTextStyle = DefaultTextStyle.of(context);
-    var effectiveTextStyle = style;
-    if (style == null || style!.inherit) {
-      effectiveTextStyle = defaultTextStyle.style.merge(style);
-    }
-
-    Widget child = BarcodePainter(
-      data,
-      barcode,
-      color,
-      drawText,
-      effectiveTextStyle,
-      textPadding,
+    return Container(
+      width: width,
+      height: height,
+      child: Image.memory(svgData, imageType: 'svg+xml'),
     );
-
-    if (errorBuilder != null) {
-      try {
-        barcode.verifyBytes(data);
-      } catch (e) {
-        child = errorBuilder!(context, e.toString());
-      }
-    }
-
-    if (padding != null) {
-      child = Padding(padding: padding!, child: child);
-    }
-
-    if (decoration != null) {
-      child = DecoratedBox(
-        decoration: decoration!,
-        child: child,
-      );
-    } else if (backgroundColor != null) {
-      child = DecoratedBox(
-        decoration: BoxDecoration(color: backgroundColor),
-        child: child,
-      );
-    }
-
-    if (width != null || height != null) {
-      child = SizedBox(width: width, height: height, child: child);
-    }
-
-    if (margin != null) {
-      child = Padding(padding: margin!, child: child);
-    }
-
-    return child;
   }
 }

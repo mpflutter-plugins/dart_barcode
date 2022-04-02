@@ -8,20 +8,11 @@ version: 2.0.2
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=1.16.0"
 
 dependencies:
   barcode: ^2.2.0
-  flutter:
-    sdk: flutter
+  flutter: ">=0.14.1"
+  mpcore: ">=0.14.1"
 
 dependency_overrides:
-  barcode:
-    path: ../barcode
-
-dev_dependencies:
-  flutter_lints: ^1.0.0
-  flutter_test:
-    sdk: flutter
-
-flutter:
+  meta: "1.7.0"
